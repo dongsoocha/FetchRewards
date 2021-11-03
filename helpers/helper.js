@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const newDate = () => new Date().toString();
+const newDate = () => new Date().toISOString();
 
 // Write to transactions.json file to keep track of inserting and outgoing transactions + modifications
 function writeToJSON(filename, content) {

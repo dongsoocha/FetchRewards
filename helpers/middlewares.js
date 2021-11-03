@@ -11,11 +11,12 @@ function mustBeInteger(req, res, next) {
 
 // Primitive validation to check validity of transaction
 function checkTransaction(req, res, next) {
-    const {payer, points, timestamp} = req.body;
+    const {payer, points} = req.body;
 
-    if (payer && points && timestamp) {
+    if (payer && points) {
         next();
     } else {
+        console.log(payer, points)
         res.status(400).json({ message: 'one or more fields are empty'})
     }
 }

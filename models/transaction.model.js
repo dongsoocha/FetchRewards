@@ -1,4 +1,5 @@
-const filename = "../data/transactions.json";
+const path = require('path');
+const filename = path.join(__dirname, '../data/transactions.json');
 let transactions = require(filename);
 const helper = require("../helpers/helper.js");
 
@@ -10,17 +11,21 @@ function getPointsBalances() {
         status: 202,
       });
     }
-
-    resolve(transactions);
+    let payers = {};
+    for (let transaction of transactions) {
+        let payer = transaction.payer;
+        payers[payer] ? payers[payer] += transaction.points : payers[payer] = transaction.points;
+    }
+    resolve(payers);
   });
 }
 
-function addTransaction(payer, amount) {
+function addTransaction(transaction) {
   return new Promise((resolve, reject) => {
     const date = helper.newDate();
     const newTransaction = {
-      payer: payer,
-      points: amount,
+      payer: transaction.payer,
+      points: transaction.points,
       timestamp: date,
     };
     transactions.push(newTransaction);
