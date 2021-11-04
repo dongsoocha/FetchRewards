@@ -28,7 +28,8 @@ After confirming everything is installed, run `$ npm install` in the root direct
 Once everything is installed, run `$ npm run start` to start the server and begin using this service!
 
 # Usage:
-
+### Note:
+The data from the challenge is contained in /data/seed.json. To prepopulate the server without having to manually add all transactions through the API calls, copy paste the data in seed.json over to data/transactions.json. This will let you immediately test spending and getting points balances without getting a 'Not enough points' or 'No points balances' errors.
 
 To fetch user point balances:
 
