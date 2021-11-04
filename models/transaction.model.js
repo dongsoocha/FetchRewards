@@ -1,6 +1,6 @@
 const path = require("path");
 const filename = path.join(__dirname, "../data/transactions.json");
-var transactions = require(filename);
+let transactions = require(filename);
 const helper = require("../helpers/helper.js");
 
 function getPointsBalances() {
@@ -99,8 +99,8 @@ function spendPoints(pointsAmount) {
       }
       start++;
       if (payers[payer] - payerAmounts[payer] < 0) {
-          negatives = true;
-          break;
+        negatives = true;
+        break;
       }
     }
     if (pointsAmount > 0 || negatives) {
@@ -109,6 +109,7 @@ function spendPoints(pointsAmount) {
         status: 202,
       });
     } else {
+      transactions = sortedTransactions;
       helper.writeToJSON(filename, sortedTransactions);
       resolve(Object.values(payerAmounts));
     }
