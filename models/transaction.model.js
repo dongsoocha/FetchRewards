@@ -7,7 +7,7 @@ function getPointsBalances() {
   return new Promise((resolve, reject) => {
     if (transactions.length === 0) {
       reject({
-        message: "No points balences",
+        message: "No points balances",
         status: 202,
       });
     }
@@ -22,7 +22,7 @@ function getPointsBalances() {
 
 function addTransaction(transaction) {
   return new Promise((resolve, reject) => {
-    const date = helper.newDate();
+    const date = transaction.date ? transaction.date : helper.newDate();
     const newTransaction = {
       payer: transaction.payer,
       points: transaction.points,
