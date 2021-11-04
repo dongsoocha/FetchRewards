@@ -23,7 +23,7 @@ router.post("/", m.mustBeInteger, async (req, res) => {
     .spendPoints(req.body)
     .then((payerAmounts) =>
       res.status(201).json({
-        message: `${req.body} points successfully spent!`,
+        message: `${req.body.points} points successfully spent!`,
         content: payerAmounts,
       })
     )

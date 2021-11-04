@@ -1,6 +1,6 @@
-const path = require('path');
-const filename = path.join(__dirname, '../data/transactions.json');
-let transactions = require(filename);
+const path = require("path");
+const filename = path.join(__dirname, "../data/transactions.json");
+var transactions = require(filename);
 const helper = require("../helpers/helper.js");
 
 function getPointsBalances() {
@@ -13,8 +13,10 @@ function getPointsBalances() {
     }
     let payers = {};
     for (let transaction of transactions) {
-        let payer = transaction.payer;
-        payers[payer] ? payers[payer] += transaction.points : payers[payer] = transaction.points;
+      let payer = transaction.payer;
+      payers[payer]
+        ? (payers[payer] += transaction.points)
+        : (payers[payer] = transaction.points);
     }
     resolve(payers);
   });
@@ -23,19 +25,26 @@ function getPointsBalances() {
 function addTransaction(transaction) {
   return new Promise((resolve, reject) => {
     const date = transaction.date ? transaction.date : helper.newDate();
-    const newTransaction = {
-      payer: transaction.payer,
-      points: transaction.points,
-      timestamp: date,
-    };
-    transactions.push(newTransaction);
-    helper.writeToJSON(filename, transactions);
-    resolve(newTransaction);
+    if (transaction.payer && transaction.points) {
+      const newTransaction = {
+        payer: transaction.payer,
+        points: transaction.points,
+        timestamp: date,
+      };
+      transactions.push(newTransaction);
+      helper.writeToJSON(filename, transactions);
+      resolve(newTransaction);
+    } else {
+        reject({
+            message: "One or more fields are empty",
+            status: 202,
+        })
+    }
   });
 }
 
 function spendPoints(pointsAmount) {
-  let sortedTransactions = transactions.sort(
+  let sortedTransactions = JSON.parse(JSON.stringify(transactions)).sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
   pointsAmount = parseInt(pointsAmount.points);
@@ -43,50 +52,48 @@ function spendPoints(pointsAmount) {
     let start = 0;
     let payerAmounts = {};
     while (start < sortedTransactions.length && pointsAmount > 0) {
-        const transactionValue = sortedTransactions[start].points;
-        const payer = sortedTransactions[start].payer;
-        sortedTransactions[start].points = 0;
-        if (transactionValue === 0) {
-            start++;
-            continue;
-        } 
-
-        if (pointsAmount > transactionValue) {
-            if (payerAmounts[payer]) {
-                payerAmounts[payer].points -= transactionValue;
-            } else {
-                payerAmounts[payer] = {
-                    payer: `${payer}`,
-                    points: -transactionValue,
-                };
-            }
-            pointsAmount -= transactionValue;
-        } else {
-            const spent = pointsAmount;
-            pointsAmount = 0;
-            sortedTransactions[start].points = transactionValue - spent;
-            if (payerAmounts[payer]) {
-                payerAmounts[payer].points -= spent;
-            } else {
-                payerAmounts[payer] = {
-                    payer: `${payer}`,
-                    points: -spent,
-                }
-            }
-        }
+        console.log(transactions)
+      const transactionValue = sortedTransactions[start].points;
+      const payer = sortedTransactions[start].payer;
+      sortedTransactions[start].points = 0;
+      if (transactionValue === 0) {
         start++;
+        continue;
+      }
+
+      if (pointsAmount > transactionValue) {
+        if (payerAmounts[payer]) {
+          payerAmounts[payer].points -= transactionValue;
+        } else {
+          payerAmounts[payer] = {
+            payer: `${payer}`,
+            points: -transactionValue,
+          };
+        }
+        pointsAmount -= transactionValue;
+      } else {
+        const spent = pointsAmount;
+        pointsAmount = 0;
+        sortedTransactions[start].points = transactionValue - spent;
+        if (payerAmounts[payer]) {
+          payerAmounts[payer].points -= spent;
+        } else {
+          payerAmounts[payer] = {
+            payer: `${payer}`,
+            points: -spent,
+          };
+        }
+      }
+      start++;
     }
     if (pointsAmount > 0) {
-        reject({
-            message: "Not enough points",
-            status: 202,
-        });
+      reject({
+        message: "Not enough points",
+        status: 202,
+      });
     } else {
-        helper.writeToJSON(
-            filename,
-            sortedTransactions,
-        )
-        resolve(Object.values(payerAmounts));
+      helper.writeToJSON(filename, sortedTransactions);
+      resolve(Object.values(payerAmounts));
     }
   });
 }
@@ -102,12 +109,11 @@ function cleanUsedPoints() {
     let valid = [];
     let filtered = [];
     for (let transaction of transactions) {
-        transaction.points !== 0 ? valid.push(transaction) : filtered.push(transaction);
+      transaction.points !== 0
+        ? valid.push(transaction)
+        : filtered.push(transaction);
     }
-    helper.writeToJSON(
-      filename,
-      valid
-    );
+    helper.writeToJSON(filename, valid);
     resolve(filtered);
   });
 }
