@@ -65,7 +65,6 @@ function spendPoints(pointsAmount) {
     let payerAmounts = {};
     let negatives = false;
     while (start < sortedTransactions.length && pointsAmount > 0) {
-      console.log(transactions);
       const transactionValue = sortedTransactions[start].points;
       const payer = sortedTransactions[start].payer;
       sortedTransactions[start].points = 0;
