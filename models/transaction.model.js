@@ -22,6 +22,17 @@ function getPointsBalances() {
   });
 }
 
+function getPointsForNegTest() {
+  let payers = {};
+  for (let transaction of transactions) {
+    let payer = transaction.payer;
+    payers[payer]
+      ? (payers[payer] += transaction.points)
+      : (payers[payer] = transaction.points);
+  }
+  return payers;
+}
+
 function addTransaction(transaction) {
   return new Promise((resolve, reject) => {
     const date = transaction.date ? transaction.date : helper.newDate();
@@ -35,10 +46,10 @@ function addTransaction(transaction) {
       helper.writeToJSON(filename, transactions);
       resolve(newTransaction);
     } else {
-        reject({
-            message: "One or more fields are empty",
-            status: 202,
-        })
+      reject({
+        message: "One or more fields are empty",
+        status: 202,
+      });
     }
   });
 }
@@ -48,11 +59,13 @@ function spendPoints(pointsAmount) {
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
   pointsAmount = parseInt(pointsAmount.points);
+  const payers = getPointsForNegTest();
   return new Promise((resolve, reject) => {
     let start = 0;
     let payerAmounts = {};
+    let negatives = false;
     while (start < sortedTransactions.length && pointsAmount > 0) {
-        console.log(transactions)
+      console.log(transactions);
       const transactionValue = sortedTransactions[start].points;
       const payer = sortedTransactions[start].payer;
       sortedTransactions[start].points = 0;
@@ -85,8 +98,12 @@ function spendPoints(pointsAmount) {
         }
       }
       start++;
+      if (payers[payer] - payerAmounts[payer] < 0) {
+          negatives = true;
+          break;
+      }
     }
-    if (pointsAmount > 0) {
+    if (pointsAmount > 0 || negatives) {
       reject({
         message: "Not enough points",
         status: 202,
