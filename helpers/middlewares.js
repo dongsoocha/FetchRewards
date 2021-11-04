@@ -16,7 +16,6 @@ function checkTransaction(req, res, next) {
     if (payer && points) {
         next();
     } else {
-        console.log(payer, points)
         res.status(400).json({ message: 'one or more fields are empty'})
     }
 }

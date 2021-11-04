@@ -38,6 +38,7 @@ function spendPoints(pointsAmount) {
   let sortedTransactions = transactions.sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
+  pointsAmount = parseInt(pointsAmount.points);
   return new Promise((resolve, reject) => {
     let start = 0;
     let payerAmounts = {};
@@ -63,6 +64,7 @@ function spendPoints(pointsAmount) {
         } else {
             const spent = pointsAmount;
             pointsAmount = 0;
+            sortedTransactions[start].points = transactionValue - spent;
             if (payerAmounts[payer]) {
                 payerAmounts[payer].points -= spent;
             } else {
@@ -72,6 +74,7 @@ function spendPoints(pointsAmount) {
                 }
             }
         }
+        start++;
     }
     if (pointsAmount > 0) {
         reject({
@@ -83,7 +86,7 @@ function spendPoints(pointsAmount) {
             filename,
             sortedTransactions,
         )
-        resolve(payerAmounts);
+        resolve(Object.values(payerAmounts));
     }
   });
 }
@@ -96,12 +99,16 @@ function cleanUsedPoints() {
         status: 202,
       });
     }
-
+    let valid = [];
+    let filtered = [];
+    for (let transaction of transactions) {
+        transaction.points !== 0 ? valid.push(transaction) : filtered.push(transaction);
+    }
     helper.writeToJSON(
       filename,
-      transactions.reject((transaction) => transaction.amount === 0)
+      valid
     );
-    resolve(transactions);
+    resolve(filtered);
   });
 }
 
